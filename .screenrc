@@ -1,0 +1,2 @@
+caption always "%{= kw}%-w%{= kG}%{+b}[%n %t]%{-b}%{= kw}%+w %= %{g}%H%{-}"
+defscrollback 10000
