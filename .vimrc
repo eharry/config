@@ -97,6 +97,8 @@ syntax enable                               " syntax highlight
 
 let mapleader = ' '
 
+set novisualbell
+
 set t_Co=256                                " set 256 colors
 
 set number                                  " show line numbers
@@ -301,7 +303,7 @@ set showcmd
 
 " Hide buffers
 set hidden
-set visualbell
+"set visualbell
 
 " Indent using four spaces
 set expandtab smarttab
