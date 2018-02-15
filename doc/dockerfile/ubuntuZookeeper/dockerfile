@@ -1,0 +1,17 @@
+# This dockerfile uses the ubuntu image
+# VERSION 2 - EDITION 1
+# Author: docker_user
+# Command format: Instruction [arguments / command] ..
+ 
+# Base image to use, this must be set as the first line
+FROM eharry/ubuntu_config:001
+ 
+# Maintainer: docker_user <docker_user at email.com> (@docker_user)
+MAINTAINER eharry eharry@foxmail.com
+ 
+# Commands to update the image
+#RUN apt install libaio1
+
+ 
+# Commands when creating a new container
+CMD /bin/bash

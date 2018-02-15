@@ -1,0 +1,36 @@
+# This dockerfile uses the ubuntu image
+# VERSION 2 - EDITION 1
+# Author: docker_user
+# Command format: Instruction [arguments / command] ..
+ 
+# Base image to use, this must be set as the first line
+FROM ubuntu
+ 
+# Maintainer: docker_user <docker_user at email.com> (@docker_user)
+MAINTAINER eharry eharry@foxmail.com
+ 
+# Commands to update the image
+RUN rm -rf /etc/apt/sources.list; \
+touch /etc/apt/sources.list; \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-proposed main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-proposed main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse" >> /etc/apt/sources.list ; \
+cat /etc/apt/sources.list ; \
+apt-get update ;
+
+RUN apt-get -y install build-essential htop vim python gdb ctags cscope screen tmux \
+autoconf automake libtool cmake zlib1g-dev pkg-config libssl-dev \
+git subversion snappy wget axel zsh curl openjdk-8-jdk ssh
+
+#RUN openjdk-8-jdk maven libsnappy-dev 
+# http://download.oracle.com/otn-pub/java/jdk/9+181/jdk-9_linux-x64_bin.tar.gz
+ 
+# Commands when creating a new container
+CMD /bin/bash
