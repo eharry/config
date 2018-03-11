@@ -27,7 +27,7 @@ apt-get update ;
 
 RUN apt-get -y install build-essential htop vim python gdb ctags cscope screen tmux \
 autoconf automake libtool cmake zlib1g-dev pkg-config libssl-dev \
-git subversion snappy wget axel zsh curl openjdk-8-jdk ssh
+git subversion snappy wget axel zsh curl ssh
 
 #RUN openjdk-8-jdk maven libsnappy-dev 
 # http://download.oracle.com/otn-pub/java/jdk/9+181/jdk-9_linux-x64_bin.tar.gz

@@ -9,8 +9,21 @@ FROM ubuntu
 # Maintainer: docker_user <docker_user at email.com> (@docker_user)
 MAINTAINER eharry eharry@foxmail.com
  
+RUN mv /etc/apt/sources.list /etc/apt/sources.list.opensource; \
+touch /etc/apt/sources.list; \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-proposed main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-proposed main restricted universe multiverse" >> /etc/apt/sources.list ; \
+echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse" >> /etc/apt/sources.list ;
+
 # Commands to update the image
-RUN apt-get update ;
+# RUN apt-get update ;
 
 #RUN apt-get -y install build-essential htop vim python gdb ctags cscope screen tmux \
 #autoconf automake libtool cmake zlib1g-dev pkg-config libssl-dev \
