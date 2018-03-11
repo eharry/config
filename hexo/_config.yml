@@ -3,16 +3,16 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Dream
+title: Hexo
 subtitle:
 description:
-author: eharry
-language: zh-Hans
+author: John Doe
+language:
 timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: https://eharry.github.io
+url: https://eharry.github.io 
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
@@ -72,34 +72,11 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-#theme: landscape
-theme: next
-#theme: yilia
+theme: landscape
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
-#  repository: git@github.com:eharry/eharry.github.io.git
-#  repository: https://github.com/eharry/eharry.github.io.git
 deploy:
-  repository: git@github.com:eharry/eharry.github.io.git
-  branch: master
   type: git
-
-jsonContent:
-    meta: false
-    pages: false
-    posts:
-      title: true
-      date: true
-      path: true
-      text: false
-      raw: false
-      content: false
-      slug: false
-      updated: false
-      comments: false
-      link: false
-      permalink: false
-      excerpt: false
-      categories: false
-      tags: true
+  repo: git@github.com:eharry/eharry.github.io.git
+  branch: master

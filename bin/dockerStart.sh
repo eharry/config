@@ -6,14 +6,19 @@
 #imageName="eharry/ubuntu_config:001"
 #imageName="eharry/ubuntu_zookeeper:001"
 #imageName="eharry/ubuntu_mysql:002"
-imageName="eharry/ubuntu_build_mongodb:002"
+imageName="eharry/ubuntu_build_mongodb:004"
 #imageName="eharry/ubuntu_build_mysql:001"
 
 
 cmd="/bin/bash"
-diskMap="-v /Volumes/disk2/eharry/documents/docker/eharry/dir/home/:/home"
+
+diskMap="-v /Volumes/disk2:/data"
+#diskMap=""
+
+capSet="--cap-add=SYS_PTRACE"
 
 
 
 
-docker run ${diskMap} -i -t ${imageName}  ${cmd}
+
+docker run ${diskMap} ${capSet} -i -t ${imageName} ${cmd}
