@@ -13,6 +13,9 @@ echo "op.sh clean"
 echo "op.sh runYCSB ip workload threadNumber [load|run]"
 echo "op.sh dropDatabase database"
 echo "op.sh showdbs"
+echo "op.sh remount options"
+echo "op.sh cleanAuditLog"
+echo "op.sh shutdownOpLog"
 }
 
 mongod=/exDisk/package/bin/mongod
@@ -49,7 +52,7 @@ p
 w
 EOF
   mkfs.ext4 /dev/vdb1
-  echo "/dev/vdb1 /exDisk                   ext4    defaults        1 2" >> /etc/fstab
+  echo "/dev/vdb1 /exDisk                   ext4    defaults        0 0" >> /etc/fstab
   mount -a
   df -h 
 elif [ "x${cmd}" = "xshowdbs" ]; then
@@ -57,6 +60,15 @@ elif [ "x${cmd}" = "xshowdbs" ]; then
   use admin
   db.auth('rwuser','Gauss_123')
   show dbs
+  exit
+EOF
+elif [ "x${cmd}" = "xshutdownOpLog" ]; then
+  ${mongo} <<EOF
+  use admin
+  db.auth('rwuser','Gauss_123')
+  use $db
+  db.runCommand({"reload": "auditOpFilter", "param": 'off'})
+  db.runCommand({"reload": "auditAuthSuccess", "param": false})
   exit
 EOF
 elif [ "x${cmd}" = "xdropDatabase" ]; then
@@ -70,10 +82,38 @@ elif [ "x${cmd}" = "xdropDatabase" ]; then
   show dbs
   exit
 EOF
+elif [ "x${cmd}" = "xcleanAuditLog" ]; then
+  echo "" > /exDisk/package/audit_mongod.log
 elif [ "x${cmd}" = "xinitRepl" ]; then
   ${mongo} ${baseDir}/init.real.js   
 elif [ "x${cmd}" = "xcreateUser" ]; then
-  ${mongo} mongodb://127.0.0.1/admin ${baseDir}/createUser.js   
+  #${mongo} mongodb://127.0.0.1/admin ${baseDir}/createUser.js   
+  ${mongo} mongodb://127.0.0.1/admin <<EOF
+  db.createUser({
+    user: 'admin',
+    pwd: 'Gauss_123',
+    "passwordDigestor": "server",
+    roles: ["root", "__system"]
+  })
+  use admin
+  db.auth('admin','Gauss_123')
+  db.createUser({
+    user: 'rwuser',
+    pwd: 'Gauss_123',
+    "passwordDigestor": "server",
+    roles: ["root", "__system"]
+  });
+EOF
+elif [ "x${cmd}" = "xremount" ]; then
+  whoami
+  options=$2
+  echo "options is $options"
+  set -x
+  sed -i '/\/dev\/vdb1.*/d' /etc/fstab
+  echo "/dev/vdb1 /exDisk ext4 $options 0 0" >> /etc/fstab
+  set +x
+  umount /dev/vdb1
+  mount -a
 else
   usage
 fi

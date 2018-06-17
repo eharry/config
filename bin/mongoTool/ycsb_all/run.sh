@@ -17,7 +17,7 @@ function copyFile() {
   
   expect -c "
   set timeout 1000;
-  spawn scp ${srcFileName} root@${ip}://${targetFileName}
+  spawn scp -p ${srcFileName} root@${ip}://${targetFileName}
   expect {
     *yes/no* { send \"yes\r\"; exp_continue }
     *assword* { send \"${password}\r\" }
@@ -65,7 +65,7 @@ function copyFiles()
 loadMongodbDiskFun() {
   exeRemoteCmds "mkdir -p /exDisk; ls -l /exDisk"
   copyFiles op.sh /tmp/op.sh
-  exeRemoteCmds "sh /tmp/op.sh prepareDisk"
+  exeRemoteCmds "/tmp/op.sh prepareDisk"
 }
 
 configReplicaFun() {
@@ -84,9 +84,12 @@ configReplicaFun() {
     sed -i "s/HOST_TEMP${cnt}/$ip/g" init.real.js
     ((cnt=cnt+1))
   done
+
   
   copyFiles init.real.js /exDisk/package/init.real.js
   copyFiles createUser.js /exDisk/package/createUser.js
+
+  updateAdminWhiteListFun
   
   # change config
   copyFiles replConf/repl.conf /exDisk/package/replConf/repl.conf
@@ -108,22 +111,18 @@ deployMongoBinaryFun() {
 remoteCmdFun() {
   local cmd="$1"
   if [ "x$cmd" = "xinitRepl" -o "x$cmd" = "xcreateUser" -o "x$cmd" = "xshowdbs" -o "x$cmd" = "xdropDatabase" ]; then
-    copyFile ${ips[0]} op.sh /exDisk/package/op.sh
-    if [ "x$cmd" = "xdropDatabase" ]; then
-      exeRemoteCmd ${ips[0]} "sh /exDisk/package/op.sh ${cmd} $2"
-    else
-      exeRemoteCmd ${ips[0]} "sh /exDisk/package/op.sh ${cmd}"
-    fi
+    copyFile ${ips[0]} op.sh /tmp/op.sh
+    exeRemoteCmd ${ips[0]} "/tmp/op.sh ${cmd} $2"
   else
-    copyFiles op.sh /exDisk/package/op.sh
-    exeRemoteCmds "sh /exDisk/package/op.sh ${cmd}"
+    copyFiles op.sh /tmp/op.sh
+    exeRemoteCmds "/tmp/op.sh ${cmd} $2"
   fi
-#exeRemoteCmds "sh /exDisk/package/op.sh clean"
-#exeRemoteCmds "sh /exDisk/package/op.sh q"
-#exeRemoteCmds "sh /exDisk/package/op.sh s"
-#exeRemoteCmd ${ips[0]} "sh /exDisk/package/op.sh initRepl"
+#exeRemoteCmds "/tmp/op.sh clean"
+#exeRemoteCmds "/tmp/op.sh q"
+#exeRemoteCmds "/tmp/op.sh s"
+#exeRemoteCmd ${ips[0]} "/tmp/op.sh initRepl"
 #sleep 20
-#exeRemoteCmd ${ips[0]} "sh /exDisk/package/op.sh createUser"
+#exeRemoteCmd ${ips[0]} "/tmp/op.sh createUser"
 }
 
 deployYCSBFun() {
@@ -140,17 +139,29 @@ runYCSBFun() {
   local logFile=$4
   copyFile $clientIp $workload /tmp/
   copyFile $clientIp op.sh /tmp/
-  exeRemoteCmd ${clientIp} "sh /tmp/op.sh runYCSB ${ips[0]} $workload $n $f" 
-#  exeRemoteCmd ${clientIp} "sh /tmp/op.sh runYCSB ${ips[0]} $workload $n $f" > utlog/$logFile
+  exeRemoteCmd ${clientIp} "/tmp/op.sh runYCSB ${ips[0]} $workload $n $f" 
+#  exeRemoteCmd ${clientIp} "/tmp/op.sh runYCSB ${ips[0]} $workload $n $f" > utlog/$logFile
+}
+
+updateAdminWhiteListFun() {
+  # generate the whiteList
+  ipList="127.0.0.1" 
+  for ip in ${ips[@]};do
+    ipList="$ipList,$ip"
+  done
+  echo "$ipList" > adminWhiteList
+  
+  copyFiles adminWhiteList /exDisk/package/adminWhiteList
 }
 
 usage() {
   echo "run.sh loadMongodbDisk"
   echo "run.sh deployMongoBinary path"
   echo "run.sh configReplica"
-  echo "run.sh remoteCmd [k|s|q|initRepl|createUser|clean|showdbs|dropDatabase]"
+  echo "run.sh remoteCmd [k|s|q|initRepl|createUser|clean|showdbs|dropDatabase database|remount options|cleanAuditLog|shutdownOpLog]"
   echo "run.sh deployYCSB"
   echo "run.sh runYCSB workload threadNum [load|run] logPath"
+  echo "run.sh updateAdminWhiteList"
 }
 
 # ------------------------ main -------------------------
@@ -170,5 +181,9 @@ elif [ "$cmd" = "deployYCSB" ]; then
   deployYCSBFun
 elif [ "$cmd" = "runYCSB" ]; then
   runYCSBFun $2 $3 $4 $5
+elif [ "$cmd" = "updateAdminWhiteList" ]; then
+  updateAdminWhiteListFun 
+else
+  usage
 fi
 

@@ -9,8 +9,6 @@ security:
   authorization: enabled 
   javascriptEnabled: false 
   keyFile: /exDisk/package/keyfile 
-  whitelist:
-    adminWhiteListPath: /exDisk/package/adminWhiteList
 
 replication:
   enableMajorityReadConcern: true
