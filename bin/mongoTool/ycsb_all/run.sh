@@ -1,14 +1,7 @@
 #!/bin/bash
 
-ips=(
-"192.168.0.137"
-"192.168.0.185"
-"192.168.0.161"
-)
-password="Gauss_123"
-jdkPackage="jdk-8u172-linux-x64.tar.gz"
-clientIp="192.168.0.42"
 
+. conf
 # ------------------------------------------------------------------------
 function copyFile() {
   ip=$1
@@ -111,10 +104,10 @@ deployMongoBinaryFun() {
 remoteCmdFun() {
   local cmd="$1"
   if [ "x$cmd" = "xinitRepl" -o "x$cmd" = "xcreateUser" -o "x$cmd" = "xshowdbs" -o "x$cmd" = "xdropDatabase" ]; then
-    copyFile ${ips[0]} op.sh /tmp/op.sh
+#    copyFile ${ips[0]} op.sh /tmp/op.sh
     exeRemoteCmd ${ips[0]} "/tmp/op.sh ${cmd} $2"
   else
-    copyFiles op.sh /tmp/op.sh
+#    copyFiles op.sh /tmp/op.sh
     exeRemoteCmds "/tmp/op.sh ${cmd} $2"
   fi
 #exeRemoteCmds "/tmp/op.sh clean"
@@ -139,8 +132,8 @@ runYCSBFun() {
   local logFile=$4
   copyFile $clientIp $workload /tmp/
   copyFile $clientIp op.sh /tmp/
-  exeRemoteCmd ${clientIp} "/tmp/op.sh runYCSB ${ips[0]} $workload $n $f" 
-#  exeRemoteCmd ${clientIp} "/tmp/op.sh runYCSB ${ips[0]} $workload $n $f" > utlog/$logFile
+#  exeRemoteCmd ${clientIp} "/tmp/op.sh runYCSB ${ips[0]} $workload $n $f" 
+  exeRemoteCmd ${clientIp} "/tmp/op.sh runYCSB ${ips[0]} $workload $n $f" > utlog/$logFile
 }
 
 updateAdminWhiteListFun() {
@@ -154,6 +147,40 @@ updateAdminWhiteListFun() {
   copyFiles adminWhiteList /exDisk/package/adminWhiteList
 }
 
+mtuFun() {
+  local eth=$1
+  local mtuNumber=$2
+  exeRemoteCmds "ifconfig $eth mtu $mtuNumber; ifconfig"
+  exeRemoteCmd ${clientIp} "ifconfig $eth mtu $mtuNumber; ifconfig" 
+}
+
+
+calcOffset() {
+  local functionName=$1
+  local offset=$2
+  local addr=$3
+  local debugBinaryPath=$4
+ 
+  local readOnlyFunctionName=`c++filt _ZN5mongo22WiredTigerSessionCache14releaseSessionEPNS_17WiredTigerSessionE | sed 's/(.*//g'`
+  local resultStr=`nm -C $debugBinaryPath | grep "$readOnlyFunctionName"`
+  echo "resultStr: $resultStr"
+  local count=`nm -C $debugBinaryPath | grep "$readOnlyFunctionName"| wc -l`
+  if [ $count -gt 1 ]; then
+    nm -C $debugBinaryPath | grep "$readOnlyFunctionName"
+    echo "please input the index which function is right: such as 1 2 3"
+    read inputIndex
+    resultStr="echo $resultStr | sed -n ${inputIndex}p"
+  elif [ $count -eq 0 ]; then
+    echo "cannot find the function, need recheck the input"
+    exit 1
+  fi
+  
+  local addr1=`echo $resultStr | awk '{print $1}'`
+  addr1="0x$addr1"
+  local offsetReal=$[addr - addr1 - offset]
+  echo "offsetReal is $offsetReal"
+}
+
 usage() {
   echo "run.sh loadMongodbDisk"
   echo "run.sh deployMongoBinary path"
@@ -162,6 +189,9 @@ usage() {
   echo "run.sh deployYCSB"
   echo "run.sh runYCSB workload threadNum [load|run] logPath"
   echo "run.sh updateAdminWhiteList"
+  echo "run.sh mtu eth number"
+  echo "run.sh calcOffset functionName offset1 addr debugBinaryPath"
+  echo "run.sh showStack offset debugBinaryPath addr[ ...]"
 }
 
 # ------------------------ main -------------------------
@@ -183,6 +213,23 @@ elif [ "$cmd" = "runYCSB" ]; then
   runYCSBFun $2 $3 $4 $5
 elif [ "$cmd" = "updateAdminWhiteList" ]; then
   updateAdminWhiteListFun 
+elif [ "$cmd" = "mtu" ]; then
+  mtuFun $2 $3
+elif [ "$cmd" = "calcOffset" ]; then
+  calcOffset $2 $3 $4 $5
+elif [ "$cmd" = "showStack" ]; then
+  offset=$2
+  debugBinaryPath=$3
+  shift 3
+
+  until [ $# -eq 0 ]
+  do
+    inputAddr=$1
+    printf -v realAddr "%#x" $[inputAddr - offset]
+    addr2line -e $debugBinaryPath -ifC $realAddr
+    shift
+  done
+  
 else
   usage
 fi

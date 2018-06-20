@@ -1,0 +1,10 @@
+
+ips=(
+"192.168.0.87"
+"192.168.0.102"
+"192.168.0.89"
+)
+
+password="Gauss_123"
+jdkPackage="jdk-8u172-linux-x64.tar.gz"
+clientIp="192.168.0.127"

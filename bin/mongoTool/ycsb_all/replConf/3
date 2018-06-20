@@ -3,7 +3,7 @@ net:
 
 operationProfiling:
   mode: off
-  slowOpThresholdMs: 10000
+  slowOpThresholdMs: 100
 
 processManagement: 
   fork: true 
