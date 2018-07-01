@@ -17,10 +17,12 @@ cmd="/bin/bash"
 diskMap="-v /Volumes/disk2:/data"
 #diskMap=""
 
+portMap="-p 12017:12017"
+
 capSet="--cap-add=SYS_PTRACE"
 
 
 
 
 
-docker run ${diskMap} ${capSet} -i -t ${imageName} ${cmd}
+docker run ${diskMap} ${capSet} ${portMap} -i -t ${imageName} ${cmd}
