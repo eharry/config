@@ -1,3 +1,11 @@
+
+---
+title: 038-mongodb util类之Decorable
+date: 2018-02-18 09:33:08
+tags: mongodb,
+---
+
+
 ###mongodb 代码阅读-003
 
 ####mongodb util类之Decorable
@@ -12,6 +20,9 @@
 ServiceContext* serviceContext = txn->getClient()->getServiceContext();
 AuthorizationManager* authzManager = AuthorizationManager::get(serviceContext);
 ```
+
+
+<!--more-->
 
 上面的函数 AuthorizationManager* authzManager = AuthorizationManager::get(serviceContext);
 
